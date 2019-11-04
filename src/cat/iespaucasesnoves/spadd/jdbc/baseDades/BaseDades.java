@@ -34,6 +34,7 @@ public class BaseDades {
         con.close();
         return resultatsQuery;
     }
+
     public List getLlibresLlengua(String llengua)throws SQLException{
         Connection con = DriverManager.getConnection( connectionURL, properties );
         Statement statement = con.createStatement();
@@ -48,6 +49,7 @@ public class BaseDades {
         con.close();
         return resultatsQuery;
     }
+
     public List getLlibresLlenguaSafe(String llengua)throws SQLException{
         Connection con = DriverManager.getConnection( connectionURL, properties );
         Statement statement = con.createStatement();
@@ -79,18 +81,72 @@ public class BaseDades {
     }
 
     public Autor getAutor(int ID_AUT) throws SQLException {
+        Autor autor = null;
         Connection con = DriverManager.getConnection( connectionURL, properties );
         Statement statement = con.createStatement();
-        ResultSet result = statement.executeQuery("SELECT ID_AUT, NOM_AUT, FK_NACIONALITAT from AUTORS");
-        Autor autor = new Autor( result.getInt("ID_AUT"), result.getString("NOM_AUT"), result.getString("FK_NACIONALITAT") ) ;
+        ResultSet result = statement.executeQuery("SELECT ID_AUT, NOM_AUT, FK_NACIONALITAT FROM AUTORS WHERE ID_AUT = " + ID_AUT + ";");
         while( result.next() ){
-            int ID_AUT = result.getInt("ID_AUT");
+            int id = result.getInt("ID_AUT");
+            String nom = result.getString("NOM_AUT");
             String nacionalitat = result.getString("FK_NACIONALITAT");
-            String nacionalitat = result.getString("FK_NACIONALITAT");
-            nacionalitats.add( new Nacionalitat(nacionalitat) );
+            autor = new Autor( id,nom,nacionalitat ) ;
+            con.close();
+            return autor;
+        }
+        return autor;
+    }
+    public void insereixNacionalitatAutors(Nacionalitat nacionalitat, List<Autor> autors)throws SQLException{
+        Connection con = DriverManager.getConnection( connectionURL, properties );
+        Statement statement = con.createStatement();
+        int filesAfectades=statement.executeUpdate("INSERT INTO NACIONALITATS(NACIONALITAT) VALUES('" + nacionalitat.getNom() + "');");
+        for (Autor autor: autors) {
+            filesAfectades=statement.executeUpdate("INSERT INTO AUTORS(NOM_AUT, FK_NACIONALITAT) VALUES('" + autor.getNomAutor() + "','" + nacionalitat.getNom() + "')");
+        }
+    }
+
+    //13- Crea el mètode insereixNacionalitatAutorsTransaccio() que rebi com a paràmetre una
+    // nacionalitat i una llista d'autors d'aquesta nacionalitat. Els ha d'inserir a la
+    // base de dades utilitzant una transacció. Captura l'SQLException i si hi ha hagut un error fes un rollback.
+
+    public void insereixNacionalitatAutorsTransaccio(Nacionalitat nacionalitat, List<Autor> autors)throws SQLException{
+        Connection con = null;
+        try{
+            con = DriverManager.getConnection( connectionURL, properties );
+            con.setAutoCommit(false);
+            Statement statement = con.createStatement();
+            int filesAfectades=statement.executeUpdate("INSERT INTO NACIONALITATS(NACIONALITAT) VALUES('" + nacionalitat.getNom() + "');");
+            for (Autor autor: autors) {
+                filesAfectades=statement.executeUpdate("INSERT INTO AUTORS(NOM_AUT, FK_NACIONALITAT) VALUES('" + autor.getNomAutor() + "','" + nacionalitat.getNom() + "')");
+            }
+            con.commit();
+        }catch(SQLException e){
+            con.rollback();
+        }finally {
+            con.close();
+        }
+    }
+    //12- Crea el mètode esborraNacionalitat() que donada una nacionalitat com a paràmetre l'esborri de la base de dades,
+    // juntament amb tots els autors d'aquesta nacionalitat.
+    public void esborraNacionalitat(Nacionalitat nacionalitat)throws SQLException{
+        Connection con = DriverManager.getConnection( connectionURL, properties );
+        Statement statement = con.createStatement();
+        int filesAfectades=statement.executeUpdate("DELETE FROM AUTORS WHERE FK_NACIONALITAT = '" + nacionalitat.getNom() + "';");
+        filesAfectades = statement.executeUpdate("DELETE FROM NACIONALITATS WHERE NACIONALITAT = '" + nacionalitat.getNom() + "';");
+    }
+
+    public List<Autor> getAutors( Nacionalitat nacionalitat ) throws SQLException{
+        Connection con = DriverManager.getConnection( connectionURL, properties );
+        Statement statement = con.createStatement();
+        ResultSet result = statement.executeQuery("SELECT ID_AUT, NOM_AUT, FK_NACIONALITAT FROM AUTORS, NACIONALITATS WHERE NACIONALITATS.NACIONALITAT = '" + nacionalitat.getNom() + "' AND AUTORS.FK_NACIONALITAT = NACIONALITATS.NACIONALITAT;");
+        List<Autor> autors = new ArrayList<Autor>();
+        while( result.next() ){
+            int id = result.getInt("ID_AUT");
+            String nom = result.getString("NOM_AUT");
+            String fknacionalitat = result.getString("FK_NACIONALITAT");
+            autors.add( new Autor( id, nom, fknacionalitat ) );
         }
         con.close();
-        return autor;
+        return autors;
     }
 
     public String getConnection() {
