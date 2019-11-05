@@ -6,7 +6,10 @@ import cat.iespaucasesnoves.spadd.jdbc.dades.Autor;
 import cat.iespaucasesnoves.spadd.jdbc.dades.Nacionalitat;
 
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,10 +18,11 @@ public class ProvesJDBC {
     public static void main(String[] args) {
 
         Properties properties = new Properties();
-        properties.put("user", "lector");
+        properties.put("user", "root");
         properties.put("password", "seCret_19");
         try{
-            BaseDades basedades = new BaseDades( "jdbc:mysql://192.168.1.134:3306/biblioteca", properties );
+            //BaseDades basedades = new BaseDades( "jdbc:mysql://192.168.1.134:3306/biblioteca", properties );
+            BaseDades basedades = new BaseDades( "jdbc:mysql://localhost:3306/biblioteca", properties );
             try {
                 //List<String> llengues = basedades.getLlengues();
                 //List<String> llengues = basedades.getLlibresLlengua("Catalana");
@@ -41,13 +45,13 @@ public class ProvesJDBC {
                     System.out.println(autor);
                 }
 
-                //TODO : 10,11,12,13,14,15,16,17,18
 
                 //10- Crea a la classe BaseDades un mètode anomenat insereixNacionalitatAutors() que rebi com
                 // a paràmetre una nacionalitat i una llista d'autors d'aquesta nacionalitat.
                 // Els ha d'inserir a la base de dades.
-                Nacionalitat nacionalitatPerInsertar = new Nacionalitat("prueba");
-                basedades.insereixNacionalitatAutors(nacionalitatPerInsertar, autors);
+                Nacionalitat nacionalitatPerInsertar = new Nacionalitat(" vaya");
+                //basedades.insereixNacionalitatAutors(nacionalitatPerInsertar, autors);
+                basedades.insereixNacionalitatAutorsTransaccio(nacionalitatPerInsertar, autors);
 
                 //11- Comprova que la base de dades s'ha actualitzat correctament, pots utilitzar els mètodes fets anteriorment
                 // per comprovar-ho.
@@ -56,10 +60,7 @@ public class ProvesJDBC {
                 ) {
                     System.out.println(autor);
                 }
-
-
-
-
+                basedades.corregir("IRLANDES","IRLANDESA");
 
             }catch (SQLException e) {
                 e.printStackTrace();

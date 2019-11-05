@@ -95,36 +95,94 @@ public class BaseDades {
         }
         return autor;
     }
+
     public void insereixNacionalitatAutors(Nacionalitat nacionalitat, List<Autor> autors)throws SQLException{
         Connection con = DriverManager.getConnection( connectionURL, properties );
         Statement statement = con.createStatement();
-        int filesAfectades=statement.executeUpdate("INSERT INTO NACIONALITATS(NACIONALITAT) VALUES('" + nacionalitat.getNom() + "');");
+
+        String sql = "INSERT INTO NACIONALITATS(NACIONALITAT) VALUES(?);";
+        PreparedStatement preparedStatement = con.prepareStatement(sql);
+        preparedStatement.setString(1,nacionalitat.getNom());
+        System.out.println(preparedStatement);
+        preparedStatement.executeUpdate();
+        //int filesAfectades=statement.executeUpdate("INSERT INTO NACIONALITATS(NACIONALITAT) VALUES('" + nacionalitat.getNom() + "');");
         for (Autor autor: autors) {
-            filesAfectades=statement.executeUpdate("INSERT INTO AUTORS(NOM_AUT, FK_NACIONALITAT) VALUES('" + autor.getNomAutor() + "','" + nacionalitat.getNom() + "')");
+            sql = "INSERT INTO AUTORS(ID_AUT,NOM_AUT, FK_NACIONALITAT) VALUES( ( SELECT MAX(autores.ID_AUT)+1 FROM AUTORS as autores ) ,?,?);";
+            preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1, autor.getNomAutor() );
+            preparedStatement.setString(2, nacionalitat.getNom() );
+            preparedStatement.executeUpdate();
+            System.out.println(preparedStatement);
+
         }
     }
+
+
 
     //13- Crea el mètode insereixNacionalitatAutorsTransaccio() que rebi com a paràmetre una
     // nacionalitat i una llista d'autors d'aquesta nacionalitat. Els ha d'inserir a la
     // base de dades utilitzant una transacció. Captura l'SQLException i si hi ha hagut un error fes un rollback.
+
 
     public void insereixNacionalitatAutorsTransaccio(Nacionalitat nacionalitat, List<Autor> autors)throws SQLException{
         Connection con = null;
         try{
             con = DriverManager.getConnection( connectionURL, properties );
             con.setAutoCommit(false);
-            Statement statement = con.createStatement();
-            int filesAfectades=statement.executeUpdate("INSERT INTO NACIONALITATS(NACIONALITAT) VALUES('" + nacionalitat.getNom() + "');");
+            String sql = "INSERT INTO NACIONALITATS(NACIONALITAT) VALUES(?);";
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1,nacionalitat.getNom());
+            System.out.println(preparedStatement);
+            preparedStatement.executeUpdate();
             for (Autor autor: autors) {
-                filesAfectades=statement.executeUpdate("INSERT INTO AUTORS(NOM_AUT, FK_NACIONALITAT) VALUES('" + autor.getNomAutor() + "','" + nacionalitat.getNom() + "')");
+                sql = "INSERT INTO AUTORS(ID_AUT,NOM_AUT, FK_NACIONALITAT) VALUES( ( SELECT MAX(autores.ID_AUT)+1 FROM AUTORS as autores ) ,?,?);";
+                preparedStatement = con.prepareStatement(sql);
+                preparedStatement.setString(1, autor.getNomAutor() );
+                preparedStatement.setString(2, nacionalitat.getNom() );
+                System.out.println(preparedStatement);
+                preparedStatement.executeUpdate();
             }
             con.commit();
         }catch(SQLException e){
+            System.out.println("ERROR: " + e);
             con.rollback();
         }finally {
             con.close();
         }
     }
+
+    public void corregir(String valorBueno, String valorMalo) throws SQLException{
+        Connection con = null;
+        try{
+            con = DriverManager.getConnection( connectionURL, properties );
+            con.setAutoCommit(false);
+            String sql = "INSERT INTO NACIONALITATS(NACIONALITAT) VALUES(?);";
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1,valorBueno);
+            System.out.println(preparedStatement);
+            preparedStatement.executeUpdate();
+
+            sql = "UPDATE AUTORS SET FK_NACIONALITAT = ? WHERE FK_NACIONALITAT = ?";
+            preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1,valorBueno);
+            preparedStatement.setString(2,valorMalo);
+            System.out.println(preparedStatement);
+            preparedStatement.executeUpdate();
+
+            sql = "DELETE FROM NACIONALITATS WHERE NACIONALITAT = ?";
+            preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1,valorMalo);
+            System.out.println(preparedStatement);
+            preparedStatement.executeUpdate();
+            con.commit();
+        }catch(SQLException e){
+            System.out.println("ERROR: " + e);
+            con.rollback();
+        }finally {
+            con.close();
+        }
+    }
+
     //12- Crea el mètode esborraNacionalitat() que donada una nacionalitat com a paràmetre l'esborri de la base de dades,
     // juntament amb tots els autors d'aquesta nacionalitat.
     public void esborraNacionalitat(Nacionalitat nacionalitat)throws SQLException{

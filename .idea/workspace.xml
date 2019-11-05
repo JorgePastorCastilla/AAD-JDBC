@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cat/iespaucasesnoves/spadd/jdbc/ProvesJDBC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cat/iespaucasesnoves/spadd/jdbc/ProvesJDBC.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cat/iespaucasesnoves/spadd/jdbc/baseDades/BaseDades.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cat/iespaucasesnoves/spadd/jdbc/baseDades/BaseDades.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cat/iespaucasesnoves/spadd/jdbc/dades/Autor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/cat/iespaucasesnoves/spadd/jdbc/dades/Autor.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +80,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
